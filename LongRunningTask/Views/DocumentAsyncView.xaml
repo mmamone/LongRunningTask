@@ -35,6 +35,6 @@
             </ItemsControl>
         </ScrollViewer>
         <controls:ProgressRing  Grid.Row="1" IsActive="{Binding IsBusy, Mode=OneWay}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
-        <Button  Grid.Row="2" Content="Cancel Download" Command="{Binding Cancel}" Margin="10"/>
+        <Button  x:Name="Cancel" Grid.Row="2" Content="Cancel Download" Margin="10"/>
     </Grid>
 </UserControl>

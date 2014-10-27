@@ -11,7 +11,7 @@ namespace DocumentServices
     {
         IList<Paragraph> GetDocument(int numParagraphs, int latency);
         IEnumerable<Paragraph> GetDocumentEnumerable(int numParagraphs, int latency);
-        Task<IList<Paragraph>> GetDocumentAsync(int numParagraphs, int latency);
+        Task<IList<Paragraph>> GetDocumentAsync(int numParagraphs, int latency, IProgress<int> progress, CancellationToken token);
     }
 
     public class DocumentService: IDocumentService
@@ -46,13 +46,14 @@ namespace DocumentServices
            // throw new Exception("Hello");
         }
 
-        public async Task<IList<Paragraph>> GetDocumentAsync(int numParagraphs, int latency)
+        public async Task<IList<Paragraph>> GetDocumentAsync(int numParagraphs, int latency, IProgress<int> progress, CancellationToken token)
         {
             IList<Paragraph> document = new List<Paragraph>();
             for (int i = 0; i < numParagraphs; i++)
             {
-                await Task.Delay(_rand.Next(100, 1000) + latency);
+                await Task.Delay(_rand.Next(100, 1000) + latency, token);
                 document.Add(new Paragraph { Content = string.Join(" ", _li.GenerateParagraphs(1)) });
+                progress.Report((int)((i/((double)numParagraphs - 1)) * 100));
             }
             return document;
         }

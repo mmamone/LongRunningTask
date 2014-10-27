@@ -64,7 +64,7 @@ namespace LongRunningTask.ViewModels
 
             NumParagraphs = 10;
 
-            DownloadDocument = ReactiveCommand.CreateAsyncTask((o, ct) => _documentService.GetDocumentAsync(NumParagraphs, 0));
+            DownloadDocument = ReactiveCommand.CreateAsyncTask((o, ct) => _documentService.GetDocumentAsync(NumParagraphs, 0, new Progress<int>(), ct));
             DownloadDocument.Subscribe(x =>
             {
                 using (Document.SuppressChangeNotifications())

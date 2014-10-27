@@ -8,7 +8,7 @@ namespace LongRunningTask.ViewModels
     {
         
     }
-    public class ContainerViewModel : ReactiveConductor<ReactiveScreen>.Collection.AllActive, IShell
+    public class ContainerViewModel : ReactiveConductor<ReactiveScreen>.Collection.OneActive, IShell
     {
         private readonly Func<DocumentAsyncViewModel> _documentAsyncVmFac;
         private readonly Func<DocumentReactiveAsyncViewModel> _documentRxAsyncVmFac;
