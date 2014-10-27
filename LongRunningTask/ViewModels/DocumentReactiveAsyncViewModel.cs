@@ -20,10 +20,10 @@ namespace LongRunningTask.ViewModels
             get { return _isBusy.Value; }
         }
 
-        private ObservableAsPropertyHelper<int> _progress;
         public int Progress
         {
-            get { return _progress.Value; }
+            get { return _progress; }
+            set { this.RaiseAndSetIfChanged(ref _progress, value); }
         }
 
         public ReactiveCommand<IList<Paragraph>> DownloadDocument
@@ -54,6 +54,8 @@ namespace LongRunningTask.ViewModels
         }
 
         private ObservableAsPropertyHelper<bool> _indeterminant;
+        private Progress<int> _progressReporter;
+        private int _progress;
         public bool Indeterminant { get { return _indeterminant.Value; } }
 
         public DocumentReactiveAsyncViewModel(IDocumentService documentService)
@@ -62,9 +64,11 @@ namespace LongRunningTask.ViewModels
 
             _documentService = documentService;
 
+            _progressReporter = new Progress<int>(i => Progress = i);
+
             NumParagraphs = 10;
 
-            DownloadDocument = ReactiveCommand.CreateAsyncTask((o, ct) => _documentService.GetDocumentAsync(NumParagraphs, 0, new Progress<int>(), ct));
+            DownloadDocument = ReactiveCommand.CreateAsyncTask((o, ct) => _documentService.GetDocumentAsync(NumParagraphs, 0, _progressReporter, ct));
             DownloadDocument.Subscribe(x =>
             {
                 using (Document.SuppressChangeNotifications())
@@ -81,7 +85,8 @@ namespace LongRunningTask.ViewModels
                 .IsExecuting
                 .ToProperty(this, x => x.IsBusy, out _isBusy);
 
-            DownloadDocument.IsExecuting
+            this.WhenAny(x => x.CompletionState, x => x.Progress, (c, p) => c.Value == CompletionState.None && p.Value == 0)
+                .Merge(DownloadDocument.IsExecuting)
                 .ToProperty(this, x => x.Indeterminant, out _indeterminant);
 
             //TODO: cancel - create async task to cancel that will wait until DownloadDocument is finished ...

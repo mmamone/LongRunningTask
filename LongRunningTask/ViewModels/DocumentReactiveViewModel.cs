@@ -127,7 +127,6 @@ namespace LongRunningTask.ViewModels
         private void DownloadDone()
         {
             CompletionState = CompletionState.Success;
-            Debug.WriteLine("Download done at " + DateTime.Now.Ticks);
         }
 
         private void DownloadFailed(Exception ex)
