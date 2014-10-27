@@ -1,0 +1,32 @@
+﻿<UserControl x:Class="LongRunningTask.Views.ContainerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:cal="http://www.caliburnproject.org"
+             xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+             mc:Ignorable="d" Width="1024" Height="768"
+            >
+    <Grid>
+        <TabControl x:Name="Items">
+            <TabControl.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center"/>
+                        <controls:MetroProgressBar Width="80" Margin="10,0" VerticalAlignment="Center"
+                                                   Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                   IsIndeterminate="{Binding Indeterminant}"
+                                                   Value="{Binding Progress, Mode=OneWay}"/>
+                        <TextBlock Text="Success" Margin="10,0" Visibility="{Binding CompletionState, 
+                            Converter={StaticResource EnumToVisibilityConverter}, 
+                            ConverterParameter=Success}"/>
+
+                        <TextBlock Text="Fail" Margin="10,0" Visibility="{Binding CompletionState, 
+                            Converter={StaticResource EnumToVisibilityConverter}, 
+                            ConverterParameter=Fail}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </TabControl.ItemTemplate>
+        </TabControl>
+    </Grid>
+</UserControl>
