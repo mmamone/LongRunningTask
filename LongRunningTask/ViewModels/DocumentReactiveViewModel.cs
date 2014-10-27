@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.IO.Compression;
 using System.Reactive.Linq;
 using Caliburn.Micro.ReactiveUI;
 using DocumentServices;
@@ -84,7 +86,9 @@ namespace LongRunningTask.ViewModels
                                                             .ToObservable(RxApp.TaskpoolScheduler));
 
             Cancel = ReactiveCommand.Create(DownloadDocument.IsExecuting);
+            //Cancel.Subscribe(x => CompletionState = CompletionState.Cancelling);
 
+            //This triggers OnComplete on the DownloadDcoument command before it is finished executing
             _takeNum = DownloadDocument.TakeUntil(Cancel);
                 //.ObserveOn(RxApp.MainThreadScheduler)
                 //.Catch(Observable.Return(new Paragraph { Content = "Paragraph missing" }))
@@ -105,6 +109,7 @@ namespace LongRunningTask.ViewModels
                 .ThrownExceptions
                 .Subscribe(DownloadFailed);
 
+            // On cancel, this remains true for a short while longer (after OnComplete is raised)
             DownloadDocument
                 .IsExecuting
                 .ToProperty(this, x => x.IsBusy, out _isBusy);
@@ -122,6 +127,7 @@ namespace LongRunningTask.ViewModels
         private void DownloadDone()
         {
             CompletionState = CompletionState.Success;
+            Debug.WriteLine("Download done at " + DateTime.Now.Ticks);
         }
 
         private void DownloadFailed(Exception ex)
@@ -135,6 +141,7 @@ namespace LongRunningTask.ViewModels
     {
         None,
         Success,
+        Cancelling,
         Fail
     }
 }
