@@ -41,6 +41,7 @@ namespace DocumentServices
             for (int i = 0; i < numParagraphs; i++)
             {
                 Thread.Sleep(_rand.Next(100, 1000) + latency);
+                //if (_rand.Next(0,5) == 1) throw new Exception("Hello");
                 yield return new Paragraph { Content = string.Join(" ", _li.GenerateParagraphs(1)) };
             }
            // throw new Exception("Hello");

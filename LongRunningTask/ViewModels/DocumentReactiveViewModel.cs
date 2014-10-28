@@ -86,6 +86,7 @@ namespace LongRunningTask.ViewModels
                 .CreateAsyncObservable(_ => _documentService.GetDocumentEnumerable(NumParagraphs, 0).ToObservable(RxApp.TaskpoolScheduler));
 
             Cancel = ReactiveCommand.Create(DownloadDocument.IsExecuting);
+            Cancel.Subscribe(_ => {CompletionState = CompletionState.Fail;});
 
             //This triggers OnComplete on the DownloadDcoument command before it is finished executing
             _takeNum = DownloadDocument.TakeUntil(Cancel);

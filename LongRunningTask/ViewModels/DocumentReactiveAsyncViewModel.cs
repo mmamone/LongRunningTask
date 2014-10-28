@@ -32,6 +32,12 @@ namespace LongRunningTask.ViewModels
             set { _downloadDocument = value; }
         }
 
+        public ReactiveCommand<object> Cancel
+        {
+            get { return _cancel; }
+            set { _cancel = value; }
+        }
+
         public ReactiveList<Paragraph> Document
         {
             get { return _document; }
@@ -56,6 +62,8 @@ namespace LongRunningTask.ViewModels
         private ObservableAsPropertyHelper<bool> _indeterminant;
         private Progress<int> _progressReporter;
         private int _progress;
+        private IDisposable _subscription;
+        private ReactiveCommand<object> _cancel;
         public bool Indeterminant { get { return _indeterminant.Value; } }
 
         public DocumentReactiveAsyncViewModel(IDocumentService documentService)
@@ -69,13 +77,13 @@ namespace LongRunningTask.ViewModels
             NumParagraphs = 10;
 
             DownloadDocument = ReactiveCommand.CreateAsyncTask((o, ct) => _documentService.GetDocumentAsync(NumParagraphs, 0, _progressReporter, ct));
-            DownloadDocument.Subscribe(x =>
+            _subscription = DownloadDocument.Subscribe(x =>
             {
                 using (Document.SuppressChangeNotifications())
                 {
                     Document.AddRange(x);
                 }
-            }, DownloadFailed, DownloadDone);
+            }, DownloadFailed);
 
             DownloadDocument
                 .ThrownExceptions
@@ -90,13 +98,12 @@ namespace LongRunningTask.ViewModels
                 .ToProperty(this, x => x.Indeterminant, out _indeterminant);
 
             //TODO: cancel - create async task to cancel that will wait until DownloadDocument is finished ...
-            //Cancel = ReactiveCommand.Create(DownloadDocument.IsExecuting);
-            //Cancel.Subscribe(x => { });
-        }
-
-        private void DownloadDone()
-        {
-            CompletionState = CompletionState.Success;
+            Cancel = ReactiveCommand.Create(DownloadDocument.IsExecuting);
+            Cancel.Subscribe(x =>
+            {
+                _subscription.Dispose();
+                CompletionState = CompletionState.Fail;
+            });
         }
 
         private void DownloadFailed(Exception ex)
