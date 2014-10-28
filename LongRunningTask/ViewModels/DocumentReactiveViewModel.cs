@@ -58,6 +58,7 @@ namespace LongRunningTask.ViewModels
         private CompletionState _completionState;
         private string _errorMessage;
         private IDisposable _subscription;
+        private bool _commandStarted;
 
         public CompletionState CompletionState
         {
@@ -82,24 +83,15 @@ namespace LongRunningTask.ViewModels
             NumParagraphs = 10;
 
             DownloadDocument = ReactiveCommand
-                .CreateAsyncObservable(_ => _documentService.GetDocumentEnumerable(NumParagraphs, 0)
-                                                            .ToObservable(RxApp.TaskpoolScheduler));
+                .CreateAsyncObservable(_ => _documentService.GetDocumentEnumerable(NumParagraphs, 0).ToObservable(RxApp.TaskpoolScheduler));
 
             Cancel = ReactiveCommand.Create(DownloadDocument.IsExecuting);
-            //Cancel.Subscribe(x => CompletionState = CompletionState.Cancelling);
 
             //This triggers OnComplete on the DownloadDcoument command before it is finished executing
             _takeNum = DownloadDocument.TakeUntil(Cancel);
-                //.ObserveOn(RxApp.MainThreadScheduler)
-                //.Catch(Observable.Return(new Paragraph { Content = "Paragraph missing" }))
-                //.Catch(Observable.Empty<Paragraph>())
-                //.Catch<Paragraph, Exception>(ex => Observable.Return(new Paragraph { Content = "Paragraph missing" }))
-                //.ObserveOn(RxApp.MainThreadScheduler)
-                //.Take(NumParagraphs);
-                ;
 
             _subscription = _takeNum
-                .Subscribe(x => Document.Add(x), DownloadDone);
+                .Subscribe(Document.Add);
 
             _takeNum
                 .Scan(0, (acc, x) => IncrementPercentage(acc))
@@ -122,11 +114,6 @@ namespace LongRunningTask.ViewModels
         private int IncrementPercentage(int acc)
         {
             return acc + (int)(100.0/NumParagraphs);
-        }
-
-        private void DownloadDone()
-        {
-            CompletionState = CompletionState.Success;
         }
 
         private void DownloadFailed(Exception ex)
