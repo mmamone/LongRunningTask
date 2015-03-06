@@ -77,7 +77,7 @@ namespace LongRunningTask.ViewModels
             NumParagraphs = 10;
 
             DownloadDocument = ReactiveCommand.CreateAsyncTask((o, ct) => _documentService.GetDocumentAsync(NumParagraphs, 0, _progressReporter, ct));
-            _subscription = DownloadDocument.Subscribe(x =>
+            _subscription = DownloadDocument.SubscribeOn(RxApp.TaskpoolScheduler).Subscribe(x =>
             {
                 using (Document.SuppressChangeNotifications())
                 {

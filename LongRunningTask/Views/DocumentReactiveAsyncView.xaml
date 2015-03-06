@@ -21,7 +21,7 @@
                 <RowDefinition/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <Button Content="Download Document" Command="{Binding DownloadDocument}" Margin="10"/>
+            <Button Content="Download Document Async Obs" Command="{Binding DownloadDocument}" Margin="10"/>
             <TextBox Grid.Column="1" Margin="10"  Text="{Binding NumParagraphs, Mode=TwoWay}" VerticalAlignment="Stretch" HorizontalContentAlignment="Stretch" FontSize="16" FontWeight="Bold"></TextBox>
             <controls:MetroProgressBar Grid.Row="1" Grid.ColumnSpan="2" Height="20" Margin="10" Value="{Binding Progress, Mode=OneWay}"></controls:MetroProgressBar>
         </Grid>

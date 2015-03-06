@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Caliburn.Micro;
 using NLipsum.Core;
+using System.Reactive.Linq;
+using System.Reactive.Disposables;
 
 namespace DocumentServices
 {
@@ -12,6 +15,8 @@ namespace DocumentServices
         IList<Paragraph> GetDocument(int numParagraphs, int latency);
         IEnumerable<Paragraph> GetDocumentEnumerable(int numParagraphs, int latency);
         Task<IList<Paragraph>> GetDocumentAsync(int numParagraphs, int latency, IProgress<int> progress, CancellationToken token);
+
+        IObservable<Paragraph> GetDocumentObservable(int numParagraphs, int latency);
     }
 
     public class DocumentService: IDocumentService
@@ -42,6 +47,7 @@ namespace DocumentServices
             {
                 Thread.Sleep(_rand.Next(100, 1000) + latency);
                 //if (_rand.Next(0,5) == 1) throw new Exception("Hello");
+                Debug.WriteLine(string.Format("Printing item {0}", i));
                 yield return new Paragraph { Content = string.Join(" ", _li.GenerateParagraphs(1)) };
             }
            // throw new Exception("Hello");
@@ -58,6 +64,25 @@ namespace DocumentServices
             }
             return document;
         }
+
+        public IObservable<Paragraph> GetDocumentObservable(int numParagraphs, int latency)
+        {
+            return Observable.Defer(() => Observable.Create<Paragraph>(obs =>
+            {
+                for (int i = 0; i < numParagraphs; i++)
+                {
+                    Console.WriteLine("Service On thread {0}", Thread.CurrentThread.ManagedThreadId);
+                    Thread.Sleep(1000);
+                    obs.OnNext(new Paragraph { Content = string.Join(" ", _li.GenerateParagraphs(1)) });
+                }
+                obs.OnCompleted();
+                return Disposable.Create(() => Console.WriteLine("Disposing on thread {0}", Thread.CurrentThread.ManagedThreadId));
+            }))
+            .Publish()
+            //.RefCount()
+            ;
+        }
+
     }
 
     public class Paragraph : PropertyChangedBase
