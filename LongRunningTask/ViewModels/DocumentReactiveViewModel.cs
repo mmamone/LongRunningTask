@@ -92,15 +92,15 @@ namespace LongRunningTask.ViewModels
                     .SubscribeOn(RxApp.TaskpoolScheduler)
                     .ObserveOn(RxApp.MainThreadScheduler)
                     .Subscribe(p =>
-                    {
-                        Console.WriteLine("ViewModel OnNext thread {0}", Thread.CurrentThread.ManagedThreadId);
-                        Document.Add(p);
-                    },
-                    ex => { },
-                    () =>
-                    {
-                        Console.WriteLine("ViewModel OnComplete thread {0}", Thread.CurrentThread.ManagedThreadId);
-                    });
+                        {
+                            Console.WriteLine("ViewModel OnNext thread {0}", Thread.CurrentThread.ManagedThreadId);
+                            Document.Add(p);
+                        },
+                        ex => { },
+                        () =>
+                        {
+                            Console.WriteLine("ViewModel OnComplete thread {0}", Thread.CurrentThread.ManagedThreadId);
+                        });
             });
 
             DownloadDocument = ReactiveCommand
@@ -110,7 +110,7 @@ namespace LongRunningTask.ViewModels
                     return _documentService.GetDocumentObservable(NumParagraphs, 0);
                 });
 
-            DownloadDocument
+            var disposable = DownloadDocument
                 .SubscribeOn(RxApp.TaskpoolScheduler)
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(p =>
@@ -125,7 +125,11 @@ namespace LongRunningTask.ViewModels
                 });
 
             Cancel = ReactiveCommand.Create(DownloadDocument.IsExecuting);
-            Cancel.Subscribe(_ => {CompletionState = CompletionState.Fail;});
+            Cancel.Subscribe(_ =>
+            {
+                disposable.Dispose();
+                CompletionState = CompletionState.Fail;
+            });
 
             //This triggers OnComplete on the DownloadDcoument command before it is finished executing
             //_takeNum = DownloadDocument.TakeUntil(Cancel);

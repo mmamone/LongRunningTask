@@ -13,18 +13,23 @@ namespace LongRunningTask.ViewModels
         private readonly Func<DocumentAsyncViewModel> _documentAsyncVmFac;
         private readonly Func<DocumentReactiveAsyncViewModel> _documentRxAsyncVmFac;
         private readonly Func<DocumentReactiveViewModel> _documentRxVmFac;
+        private Func<DocumentsReactiveViewModel> _documentsVm;
 
         public ContainerViewModel(
             Func<DocumentAsyncViewModel> documentAsyncVmFac,
             Func<DocumentReactiveAsyncViewModel> documentRxAsyncVmFac,
-            Func<DocumentReactiveViewModel> documentRxVmFac)
+            Func<DocumentReactiveViewModel> documentRxVmFac,
+            Func<DocumentsReactiveViewModel> documentsVm)
         {
             _documentAsyncVmFac = documentAsyncVmFac;
             _documentRxAsyncVmFac = documentRxAsyncVmFac;
             _documentRxVmFac = documentRxVmFac;
+            _documentsVm = documentsVm;
+
             ActivateItem(_documentAsyncVmFac());
             ActivateItem(_documentRxAsyncVmFac());
             ActivateItem(_documentRxVmFac());
+            ActivateItem(_documentsVm());
         }
     }
 }

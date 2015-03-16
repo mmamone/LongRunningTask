@@ -57,6 +57,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.ObjectModel" />
     <Reference Include="System.Reactive.Core">
       <HintPath>..\packages\Rx-Core.2.2.5\lib\net45\System.Reactive.Core.dll</HintPath>
     </Reference>
@@ -99,10 +100,14 @@
     <Compile Include="AppBootstrapper.cs" />
     <Compile Include="EnumToVisibilityConverter.cs" />
     <Compile Include="RxTest.cs" />
+    <Compile Include="ViewModels\DocumentsReactiveViewModel.cs" />
     <Compile Include="Views\ContainerView.xaml.cs">
       <DependentUpon>ContainerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\ContainerViewModel.cs" />
+    <Compile Include="Views\DocumentsReactiveView.xaml.cs">
+      <DependentUpon>DocumentsReactiveView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\DocumentReactiveView.xaml.cs">
       <DependentUpon>DocumentReactiveView.xaml</DependentUpon>
     </Compile>
@@ -148,6 +153,10 @@
     <Page Include="Views\ContainerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\DocumentsReactiveView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\DocumentReactiveView.xaml">
       <Generator>MSBuild:Compile</Generator>

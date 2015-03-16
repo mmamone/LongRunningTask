@@ -18,9 +18,9 @@ namespace LongRunningTask.Views
     /// <summary>
     /// Interaction logic for DocumentSyncView.xaml
     /// </summary>
-    public partial class DocumentsReactiveView : UserControl
+    public partial class DocumentReactiveView : UserControl
     {
-        public DocumentsReactiveView()
+        public DocumentReactiveView()
         {
             InitializeComponent();
         }

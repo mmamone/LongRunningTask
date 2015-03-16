@@ -7,6 +7,7 @@ using Caliburn.Micro;
 using NLipsum.Core;
 using System.Reactive.Linq;
 using System.Reactive.Disposables;
+using System.Reactive.Subjects;
 
 namespace DocumentServices
 {
@@ -17,6 +18,8 @@ namespace DocumentServices
         Task<IList<Paragraph>> GetDocumentAsync(int numParagraphs, int latency, IProgress<int> progress, CancellationToken token);
 
         IObservable<Paragraph> GetDocumentObservable(int numParagraphs, int latency);
+
+        IObservable<int> UploadDoc();
     }
 
     public class DocumentService: IDocumentService
@@ -67,21 +70,78 @@ namespace DocumentServices
 
         public IObservable<Paragraph> GetDocumentObservable(int numParagraphs, int latency)
         {
-            return Observable.Defer(() => Observable.Create<Paragraph>(obs =>
+            return Observable.Create<Paragraph>(obs =>
             {
-                for (int i = 0; i < numParagraphs; i++)
+                //var cancel = new CancellationDisposable ();
+                bool stopEarly = false;
+                Task.Run(() =>
                 {
-                    Console.WriteLine("Service On thread {0}", Thread.CurrentThread.ManagedThreadId);
-                    Thread.Sleep(1000);
-                    obs.OnNext(new Paragraph { Content = string.Join(" ", _li.GenerateParagraphs(1)) });
-                }
-                obs.OnCompleted();
-                return Disposable.Create(() => Console.WriteLine("Disposing on thread {0}", Thread.CurrentThread.ManagedThreadId));
-            }))
-            .Publish()
+                    for (int i = 0; i < numParagraphs; i++)
+                    {
+                        Console.WriteLine("Service On thread {0}", Thread.CurrentThread.ManagedThreadId);
+                        Thread.Sleep(1000);
+                        if (stopEarly) return;
+                        obs.OnNext(new Paragraph { Content = string.Join(" ", _li.GenerateParagraphs(1)) });
+                    }
+                    obs.OnCompleted();
+                });
+                return Disposable.Create(() =>
+                {
+                    stopEarly = true;
+                });
+            })
+            //.Publish()
             //.RefCount()
             ;
         }
+
+        public IObservable<int> UploadDoc()
+        {
+            return Observable.Create<int>(obs =>
+            {
+                var ct = new CancellationDisposable();
+                Task.Run(() =>
+                {
+                    var rand = new Random();
+                    for (int i = 0; i <= 100; i++)
+                    {
+                        Thread.Sleep(rand.Next(10, 100));
+                        if (ct.Token.IsCancellationRequested)
+                        {
+                            obs.OnError(new Exception("Boo"));
+                            return;
+                        }
+                        obs.OnNext(i);
+                    }
+                    obs.OnCompleted();
+                });
+                return ct;
+            });
+        }
+
+        //public IObservable<Paragraph> GetDocumentObservable(int numParagraphs, int latency)
+        //{
+        //    var subject = new BehaviorSubject<Paragraph>(new Paragraph());
+        //    Task.Run(() =>
+        //    {
+        //        try
+        //        {
+        //            for (int i = 0; i < numParagraphs; i++)
+        //            {
+        //                if (i == 5) throw new Exception("Hello");
+        //                Console.WriteLine("Service On thread {0}", Thread.CurrentThread.ManagedThreadId);
+        //                Thread.Sleep(1000);
+        //                subject.OnNext(new Paragraph { Content = string.Join(" ", _li.GenerateParagraphs(1)) });
+        //            }
+        //            subject.OnCompleted();
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            subject.OnError(e);
+        //        }
+        //    });
+        //    return subject;
+        //}
 
     }
 

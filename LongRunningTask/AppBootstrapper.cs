@@ -26,6 +26,7 @@ namespace LongRunningTask
             container.PerRequest<DocumentAsyncViewModel>();
             container.PerRequest<DocumentReactiveAsyncViewModel>();
             container.PerRequest<DocumentReactiveViewModel>();
+            container.PerRequest<DocumentsReactiveViewModel>();
             container.PerRequest<IDocumentService, DocumentService>();
         }
 
