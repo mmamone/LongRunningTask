@@ -15,7 +15,7 @@ namespace LongRunningTask.ViewModels
        
         public ReactiveCommand<object> DownloadDocuments { get; set; }
 
-        private int _numDocuments = 0;
+        private int _numDocuments = 10;
         
         public int NumDocuments
         {
